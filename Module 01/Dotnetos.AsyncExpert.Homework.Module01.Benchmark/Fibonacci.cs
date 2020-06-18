@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnostics.Windows.Configs;
 
 namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 {
@@ -26,14 +27,37 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
         [ArgumentsSource(nameof(Data))]
         public ulong RecursiveWithMemoization(ulong n)
         {
-            return 0;
+            var t = new Dictionary<ulong, ulong>();
+
+            ulong FibCached(ulong n)
+            {
+                if (t.ContainsKey(n)) return t[n];
+
+                if (n <= 2) return 1;
+
+                var result = FibCached(n - 2) + FibCached(n - 1);
+
+                t.Add(n, result);
+
+                return result;
+            }
+
+            return FibCached(n);
         }
         
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public ulong Iterative(ulong n)
         {
-            return 0;
+            ulong a = 0, b = 1, c = 0;
+            for (ulong i = 2; i < n; i++)
+            {
+                c = a + b;
+                a = b;
+                b = c;
+            }
+
+            return c;
         }
 
         public IEnumerable<ulong> Data()
